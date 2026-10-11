@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AniMatriX - Home</title>
+    <!-- Favicon & iPhone App Icon -->
+    <link rel="icon" type="image/png" href="logo-5.png">
+    <link rel="apple-touch-icon" href="logo-5.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniMatriX">
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --background: #000000;
+            --text: #ffffff;
+            --accent: #b3001b;
+            --card-bg: #161616;
+            --card-border: #262626;
+            --input-bg: #161616;
+            --navbar-bg: #111111;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .safe-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--background);
+            overflow-y: auto;
+            padding-bottom: 70px; /* Space for bottom navbar */
+        }
+
+        /* Logo */
+        .logo {
+            width: 150px;
+            height: 60px;
+            object-fit: contain;
+            align-self: center;
+            margin: 10px 0;
+        }
+
+        /* Search + Filter Row */
+        .search-row {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            background-color: var(--input-bg);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 15px;
+            border: 1px solid #333;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .filter-container {
+            width: 130px;
+            height: 44px;
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            background-color: var(--input-bg);
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .filter-select {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .filter-select option {
+            background-color: #1a1a1a;
+            color: var(--text);
+        }
+
+        .filter-icon {
+            position: absolute;
+            right: 12px;
+            color: var(--accent);
+            pointer-events: none;
+            font-size: 14px;
+        }
+
+        /* Grid Results (2 columns) */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 10px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .card:active {
+            transform: scale(0.97);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            background-color: #222;
+        }
+
+        .card-title {
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px;
+            text-align: center;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Loaders */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 0;
+            width: 100%;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(179, 0, 27, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Bottom Navigation Bar */
+        .navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--navbar-bg);
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text);
+            cursor: pointer;
+            flex: 1;
+            padding: 4px 0;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            color: var(--accent);
+            margin-bottom: 2px;
+        }
+
+        .nav-text {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .nav-item.active .nav-text {
+            color: var(--accent);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="safe-area">
+        <div class="container" id="scroll-container">
+            <!-- Logo -->
+            <img src="logo-4.png" alt="AniMatriX Logo" class="logo">
+
+            <!-- Search + Filter -->
+            <div class="search-row">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    class="search-input" 
+                    placeholder="Search Anime..." 
+                    autocomplete="off"
+                >
+                <div class="filter-container">
+                    <select id="genre-select" class="filter-select">
+                        <option value="">All Genres</option>
+                        <option value="action">Action</option>
+                        <option value="comedy">Comedy</option>
+                        <option value="romance">Romance</option>
+                        <option value="fantasy">Fantasy</option>
+                        <option value="drama">Drama</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down filter-icon"></i>
+                </div>
+            </div>
+
+            <!-- Results Grid -->
+            <div id="results-grid" class="results-grid"></div>
+
+            <!-- Loading Indicator -->
+            <div id="loading-spinner" class="loading-container" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="navbar">
+            <button class="nav-item active" onclick="changeCategory('topAnime', this)">
+                <i class="fa-solid fa-fire"></i>
+                <span class="nav-text">Top Anime</span>
+            </button>
+            <button class="nav-item" onclick="changeCategory('topManga', this)">
+                <i class="fa-solid fa-book"></i>
+                <span class="nav-text">Top Manga</span>
+            </button>
+            <button class="nav-item" onclick="changeCategory('newAnime', this)">
+                <i class="fa-solid fa-star"></i>
+                <span class="nav-text">New Anime</span>
+            </button>
+            <button class="nav-item" onclick="changeCategory('newManga', this)">
+                <i class="fa-solid fa-newspaper"></i>
+                <span class="nav-text">New Manga</span>
+            </button>
+            <button class="nav-item" onclick="changeCategory('upcomingAnime', this)">
+                <i class="fa-solid fa-clock"></i>
+                <span class="nav-text">Upcoming</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        const API_BASE = "https://jikan.lucashdo.com/v1";
+        
+        const genreMap = {
+            action: 1,
+            comedy: 4,
+            romance: 22,
+            fantasy: 10,
+            drama: 8,
+        };
+
+        let state = {
+            query: "",
+            genre: "",
+            category: "topAnime",
+            page: 1,
+            hasMore: true,
+            loading: false,
+            results: []
+        };
+
+        const searchInput = document.getElementById('search-input');
+        const genreSelect = document.getElementById('genre-select');
+        const resultsGrid = document.getElementById('results-grid');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const scrollContainer = document.getElementById('scroll-container');
+
+        // Event Listeners
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                state.query = searchInput.value;
+                fetchData(1, true);
+            }
+        });
+
+        genreSelect.addEventListener('change', (e) => {
+            state.genre = e.target.value;
+            fetchData(1, true);
+        });
+
+        // Infinite Scroll
+        scrollContainer.addEventListener('scroll', () => {
+            if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 100) {
+                if (!state.loading && state.hasMore) {
+                    fetchData(state.page + 1, false);
+                }
+            }
+        });
+
+        function changeCategory(newCategory, btnElement) {
+            // Update active nav button styles
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Reset inputs and update category
+            state.category = newCategory;
+            state.query = "";
+            state.genre = "";
+            searchInput.value = "";
+            genreSelect.value = "";
+
+            // Update search placeholder based on category
+            if (newCategory.includes("Manga")) {
+                searchInput.placeholder = "Search Manga...";
+            } else {
+                searchInput.placeholder = "Search Anime...";
+            }
+
+            fetchData(1, true);
+        }
+
+        async function fetchData(pageNum = 1, reset = false) {
+            if (state.loading) return;
+            state.loading = true;
+            loadingSpinner.style.display = 'flex';
+
+            let url = "";
+
+            switch (state.category) {
+                case "topAnime":
+                    url = `${API_BASE}/top/anime?page=${pageNum}`;
+                    break;
+                case "topManga":
+                    url = `${API_BASE}/top/manga?page=${pageNum}`;
+                    break;
+                case "newAnime":
+                    url = `${API_BASE}/seasons/now?page=${pageNum}`;
+                    break;
+                case "newManga":
+                    url = `${API_BASE}/manga?page=${pageNum}&order_by=start_date&sort=desc`;
+                    break;
+                case "upcomingAnime":
+                    url = `${API_BASE}/seasons/upcoming?page=${pageNum}`;
+                    break;
+                default:
+                    url = `${API_BASE}/top/anime?page=${pageNum}`;
+            }
+
+            if (state.query.trim()) {
+                url = `${API_BASE}/anime?q=${encodeURIComponent(state.query.trim())}&page=${pageNum}`;
+            }
+
+            if (state.genre) {
+                const genreId = genreMap[state.genre];
+                url = `${API_BASE}/anime?genres=${genreId}&page=${pageNum}`;
+            }
+
+            try {
+                const res = await fetch(url);
+                const json = await res.json();
+
+                if (json && json.data) {
+                    if (reset) {
+                        state.results = json.data;
+                    } else {
+                        state.results = [...state.results, ...json.data];
+                    }
+                    state.hasMore = json.pagination?.has_next_page || (json.data.length > 0 && pageNum < 50);
+                    state.page = pageNum;
+                    renderResults();
+                }
+            } catch (err) {
+                console.error("Error fetching data:", err);
+            } finally {
+                state.loading = false;
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        function renderResults() {
+            resultsGrid.innerHTML = "";
+            state.results.forEach((item, index) => {
+                const itemId = item.id || item.malId || item.mal_id;
+                const imageUrl =
+                    item.imageUrl ||
+                    item.image_url ||
+                    item.images?.jpg?.image_url ||
+                    item.images?.image_url ||
+                    "https://via.placeholder.com/150";
+
+                const mediaType = state.category.includes("Manga") ? "manga" : "anime";
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => {
+                    window.location.href = `detail.html?id=${itemId}&type=${mediaType}`;
+                };
+
+                card.innerHTML = `
+                    <img src="${imageUrl}" alt="${item.title}" class="card-image" loading="lazy">
+                    <div class="card-title">${item.title}</div>
+                `;
+
+                resultsGrid.appendChild(card);
+            });
+        }
+
+        // Initial fetch on page load
+        fetchData(1, true);
+    </script>
+</body>
+</html>

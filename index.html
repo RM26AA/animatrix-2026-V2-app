@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AniMatriX</title>
+    <!-- Favicon / iPhone App Icon -->
+    <link rel="icon" type="image/png" href="logo-5.png">
+    <link rel="apple-touch-icon" href="logo-5.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniMatriX">
+
+    <style>
+        :root {
+            --background: #000000;
+            --text: #ffffff;
+            --accent: #b3001b;
+            --card: #111111;
+            --shadow: rgba(255, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Screen Management */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Splash Screen Specific Styles */
+        #splash-screen {
+            align-items: center;
+            justify-content: center;
+            background-color: var(--background);
+        }
+
+        .splash-logo {
+            width: 280px;
+            height: 280px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: splashEntrance 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes splashEntrance {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. SPLASH SCREEN -->
+    <div id="splash-screen" class="screen active">
+        <img src="logo-4.png" alt="AniMatriX Logo" class="splash-logo">
+    </div>
+
+    <!-- 2. HOME SCREEN CONTAINER (Placeholder) -->
+    <div id="home-screen" class="screen">
+        <h1 style="color: white; text-align: center; margin-top: 50px;">Home Screen Coming Next!</h1>
+    </div>
+
+    <!-- 3. DETAIL SCREEN CONTAINER (Placeholder) -->
+    <div id="detail-screen" class="screen">
+        <h1 style="color: white; text-align: center; margin-top: 50px;">Detail Screen Coming Later</h1>
+    </div>
+
+    <!-- Audio Element for Splash Sound Effect -->
+    <audio id="splash-audio" src="noti-2.mp3" preload="auto"></audio>
+
+    <script>
+        // Navigation helper between screens
+        function navigateTo(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Splash screen logic on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('splash-audio');
+            
+            if (audio) {
+                // Attempt to play immediately
+                audio.play().catch(() => {
+                    // If blocked by browser autoplay policy, play on first user interaction (touch/click anywhere)
+                    const playOnTouch = () => {
+                        audio.play().catch(e => console.log("Audio play failed:", e));
+                        window.removeEventListener('click', playOnTouch);
+                        window.removeEventListener('touchstart', playOnTouch);
+                    };
+                    window.addEventListener('click', playOnTouch);
+                    window.addEventListener('touchstart', playOnTouch);
+                });
+            }
+
+            // Automatically navigate to Home after 3 seconds
+            setTimeout(() => {
+                window.location.href = 'home.html';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

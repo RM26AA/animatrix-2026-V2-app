@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AniMatriX - Details</title>
+    <!-- Favicon & iPhone App Icon -->
+    <link rel="icon" type="image/png" href="logo-5.png">
+    <link rel="apple-touch-icon" href="logo-5.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniMatriX">
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --background: #000000;
+            --text: #ffffff;
+            --accent: #b3001b;
+            --card-bg: #161616;
+            --card-border: #262626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .safe-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 40px;
+        }
+
+        /* Loading & Error States */
+        .loading-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--background);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(179, 0, 27, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--accent);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 12px 0;
+            text-decoration: none;
+        }
+
+        .back-btn i {
+            margin-right: 6px;
+        }
+
+        /* Cover Image */
+        .poster-image {
+            width: 100%;
+            height: 340px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background-color: #111;
+        }
+
+        /* Title */
+        .title {
+            color: var(--accent);
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Metadata Grid */
+        .box-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .info-box {
+            background-color: var(--card-bg);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+        }
+
+        .box-label {
+            color: var(--text);
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 4px;
+            opacity: 0.9;
+        }
+
+        .box-value {
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        /* Synopsis */
+        .synopsis-box {
+            background-color: var(--card-bg);
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid var(--card-border);
+        }
+
+        .synopsis {
+            color: var(--text);
+            font-size: 14px;
+            line-height: 22px;
+            margin-top: 6px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="safe-area">
+        <div id="content-container" class="container">
+            <!-- Loading Indicator by default -->
+            <div class="loading-container" id="loading-view">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "https://jikan.lucashdo.com/v1";
+
+        // Get URL parameters (?id=...&type=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        const type = urlParams.get('type');
+
+        const container = document.getElementById('content-container');
+
+        async function fetchDetails() {
+            if (!id) {
+                renderError("No ID provided.");
+                return;
+            }
+
+            let endpoints = ["anime", "manga"];
+            if (type && type.toLowerCase().includes("manga")) {
+                endpoints = ["manga", "anime"];
+            }
+
+            let foundData = null;
+
+            try {
+                for (const endpoint of endpoints) {
+                    const url = `${API_BASE}/${endpoint}/${id}`;
+                    const res = await fetch(url);
+                    const json = await res.json();
+
+                    if (res.ok && json && json.data) {
+                        foundData = json.data;
+                        break;
+                    }
+                }
+
+                if (foundData) {
+                    renderDetails(foundData);
+                } else {
+                    renderError("Failed to load details.");
+                }
+            } catch (err) {
+                console.error("Error fetching details:", err);
+                renderError("Failed to load details.");
+            }
+        }
+
+        function renderDetails(item) {
+            const imageUrl =
+                item.imageUrl ||
+                item.image_url ||
+                item.images?.jpg?.image_url ||
+                item.images?.image_url ||
+                "https://via.placeholder.com/300";
+
+            const genres =
+                item.genres?.map((g) => (typeof g === "string" ? g : g.name)).join(", ") || "N/A";
+
+            const authorsOrStudios =
+                item.authors?.map((a) => (typeof a === "string" ? a : a.name)).join(", ") ||
+                item.studios?.map((s) => (typeof s === "string" ? s : s.name)).join(", ") || "N/A";
+
+            let dynamicBoxes = '';
+            if (item.episodes !== undefined && item.episodes !== null) {
+                dynamicBoxes += `<div class="info-box"><div class="box-label">Episodes</div><div class="box-value">${item.episodes}</div></div>`;
+            }
+            if (item.chapters !== undefined && item.chapters !== null) {
+                dynamicBoxes += `<div class="info-box"><div class="box-label">Chapters</div><div class="box-value">${item.chapters}</div></div>`;
+            }
+            if (item.volumes !== undefined && item.volumes !== null) {
+                dynamicBoxes += `<div class="info-box"><div class="box-label">Volumes</div><div class="box-value">${item.volumes}</div></div>`;
+            }
+
+            container.innerHTML = `
+                <button class="back-btn" onclick="window.location.href='home.html'">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+
+                <img src="${imageUrl}" alt="${item.title || item.name}" class="poster-image">
+
+                <h1 class="title">${item.title || item.name || 'Untitled'}</h1>
+
+                <div class="box-container">
+                    <div class="info-box"><div class="box-label">Type</div><div class="box-value">${item.type || 'N/A'}</div></div>
+                    <div class="info-box"><div class="box-label">Status</div><div class="box-value">${item.status || 'N/A'}</div></div>
+                    ${dynamicBoxes}
+                    <div class="info-box"><div class="box-label">Score</div><div class="box-value">${item.score ? '⭐ ' + item.score : 'N/A'}</div></div>
+                    <div class="info-box"><div class="box-label">Popularity</div><div class="box-value">${item.popularity ? '#' + item.popularity : 'N/A'}</div></div>
+                    <div class="info-box"><div class="box-label">Rank</div><div class="box-value">${item.rank ? '#' + item.rank : 'N/A'}</div></div>
+                    <div class="info-box"><div class="box-label">Members</div><div class="box-value">${item.members ? item.members.toLocaleString() : 'N/A'}</div></div>
+                    <div class="info-box" style="grid-column: span 2;"><div class="box-label">Genres</div><div class="box-value">${genres}</div></div>
+                    <div class="info-box" style="grid-column: span 2;"><div class="box-label">Authors/Studios</div><div class="box-value">${authorsOrStudios}</div></div>
+                </div>
+
+                <div class="synopsis-box">
+                    <div class="box-label">Synopsis</div>
+                    <div class="synopsis">${item.synopsis || "No synopsis available."}</div>
+                </div>
+            `;
+        }
+
+        function renderError(message) {
+            container.innerHTML = `
+                <div class="loading-container">
+                    <p style="color: var(--text); margin-bottom: 15px; font-size: 16px;">${message}</p>
+                    <button class="back-btn" onclick="window.location.href='home.html'">
+                        <i class="fa-solid fa-arrow-left"></i> Go Back
+                    </button>
+                </div>
+            `;
+        }
+
+        // Initialize details fetch
+        fetchDetails();
+    </script>
+</body>
+</html>
